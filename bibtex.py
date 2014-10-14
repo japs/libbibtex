@@ -6,14 +6,14 @@
 # * along with this software.                                         *
 # *********************************************************************
 #
-# This file is part of Paper
+# This file is part of libbibtex
 # 
-# Paper is free software: you can redistribute it and/or modify it under the 
+# libbibtexis free software: you can redistribute it and/or modify it under the 
 # terms of the GNU General Public License as published by the Free Software 
 # Foundation, either version 3 of the License, or (at your option) any later 
 # version.
 # 
-# Paper is distributed in the hope that it will be useful, but WITHOUT ANY 
+# libbibtex is distributed in the hope that it will be useful, but WITHOUT ANY 
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
 # FOR A PARTICULAR PURPOSE.
 # See the GNU General Public License for more details.
@@ -28,6 +28,11 @@ output_tags = ["title", "author", "journal", "volume", "page",
 months = {"01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "May", 
           "06": "Jun", "07": "Jul", "08": "Aug", "09": "Sep", "10": "Oct", 
           "11": "Nov", "12": "Dec"}
+
+def read_multiple_bibtex(textin):
+    pass
+    return []
+
 
 class Bibtex:
     '''
@@ -54,10 +59,12 @@ class Bibtex:
                 self.fields["_key"]  = tokens[1][:-1].strip(" ,").lower()
             elif "=" not in line: # end of bibtex entry
                 continue
+            elif line.strip() == "":
+                return
             else: # key = value pair
                 tokens = line.split("=")
                 tag = tokens[0].strip().lower()
-                value = tokens[1][:-1].strip(' \"\'{}')
+                value = tokens[1][:-1].strip(', \"\'{}')
                 self.set_tag(tag, value)
 
     def _init_from_ris(self, ris, key_conversion=None):
@@ -131,4 +138,5 @@ if __name__ == "__main__":
     from sys import stdin
     bib = stdin.readlines()
     b = Bibtex(bib=bib)
+    print(repr(b))
     print (b)
