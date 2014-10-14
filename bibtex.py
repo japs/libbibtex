@@ -51,16 +51,19 @@ class Bibtex:
                                        # key (@article{ref,...})
 
     def _init_from_bibtex(self, bib):
-        import re
-        for line in bib:
+        '''
+        Parses a single extisting bibtex entry, returning the number of lines
+        consumed.
+        '''
+        for linenumber, line in enumerate(bib):
             if "@" in line: # key line => extract type, key
                 tokens = line.split("{")
                 self.fields["_type"] = tokens[0][1:].strip().lower()
-                self.fields["_key"]  = tokens[1][:-1].strip(" ,").lower()
+                self.fields["_key"]  = tokens[1][:-1].strip(" ,")
             elif "=" not in line: # end of bibtex entry
                 continue
             elif line.strip() == "":
-                return
+                return linenumber
             else: # key = value pair
                 tokens = line.split("=")
                 tag = tokens[0].strip().lower()
@@ -135,8 +138,10 @@ class Bibtex:
         return out
 
 if __name__ == "__main__":
+    '''
+    Test program: pipe a bibtex into it.
+    '''
     from sys import stdin
     bib = stdin.readlines()
     b = Bibtex(bib=bib)
-    print(repr(b))
     print (b)
