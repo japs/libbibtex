@@ -22,12 +22,12 @@
 # with Paper.  If not, see <http://www.gnu.org/licenses/>
 #
 
-output_tags = ["title", "author", "journal", "volume", "page",
-               "year", "month", "publisher", "doi", "url", "archiveprefix"]
+_output_tags = ["title", "author", "journal", "volume", "page",
+                "year", "month", "publisher", "doi", "url", "archiveprefix"]
 
-months = {"01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "May", 
-          "06": "Jun", "07": "Jul", "08": "Aug", "09": "Sep", "10": "Oct", 
-          "11": "Nov", "12": "Dec"}
+_months = {"01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "May", 
+           "06": "Jun", "07": "Jul", "08": "Aug", "09": "Sep", "10": "Oct", 
+           "11": "Nov", "12": "Dec"}
 
 def multiple_bibtex_entries(inobj):
     from io import IOBase
@@ -120,7 +120,7 @@ class Bibtex:
         elif tag == "_date":
             date = value.split("/")
             self.fields["year"] = date[0]
-            self.fields["month"] = months[date[1]]
+            self.fields["month"] = _months[date[1]]
         else:
             self.fields[tag] = value
     
@@ -139,7 +139,7 @@ class Bibtex:
         '''
         out = ["@" + self.fields["_type"] + "{" + self.fields["_key"]]
         
-        for tag in output_tags:
+        for tag in _output_tags:
             try:
                 out.append(self.format(tag))
             except KeyError:
