@@ -29,9 +29,28 @@ months = {"01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "May",
           "06": "Jun", "07": "Jul", "08": "Aug", "09": "Sep", "10": "Oct", 
           "11": "Nov", "12": "Dec"}
 
-def read_multiple_bibtex(textin):
-    pass
-    return []
+def multiple_bibtex_entries(inobj):
+    from io import IOBase
+    if isinstance(inobj, str):
+        textin = inobj.splitlines()
+    elif isinstance(inobj, IOBase):
+        textin = inobj.readlines()
+    elif isinstance(inobj, list):
+        textin = inobj
+    else:
+        raise ValueError("inobj must be str, FileObj or list of strings.")
+
+    N = len(textin)
+    start = 0
+    bibtexs = []
+    while start < N:
+        try:
+            b, lines_consumed = Bibtex.from_bibtex(textin[start:])
+        except ValueError:
+            break
+        start += lines_consumed
+        bibtexs.append(b)
+    return bibtexs
 
 
 class Bibtex:
@@ -49,7 +68,7 @@ class Bibtex:
         if ref:
             self.fields["_key"] = ref  # This will become the item's 
                                        # key (@article{ref,...})
-
+  
     def _init_from_bibtex(self, bib):
         '''
         Parses a single extisting bibtex entry, returning the number of lines
@@ -58,17 +77,26 @@ class Bibtex:
         for linenumber, line in enumerate(bib):
             if "@" in line: # key line => extract type, key
                 tokens = line.split("{")
-                self.fields["_type"] = tokens[0][1:].strip().lower()
-                self.fields["_key"]  = tokens[1][:-1].strip(" ,")
-            elif "=" not in line: # end of bibtex entry
+                self.fields["_type"] = tokens[0].strip("@\n \t").lower()
+                self.fields["_key"]  = tokens[1].strip(" ,\n")
+            elif line.strip() == "}": # end of bibtex entry
+                return linenumber + 1
+            elif "=" not in line:
                 continue
-            elif line.strip() == "":
-                return linenumber
             else: # key = value pair
                 tokens = line.split("=")
                 tag = tokens[0].strip().lower()
-                value = tokens[1][:-1].strip(', \"\'{}')
+                value = tokens[1].strip(', \"\'{}\n')
                 self.set_tag(tag, value)
+        return linenumber + 1
+ 
+    @staticmethod
+    def from_bibtex(bib):
+        out = Bibtex()
+        lines = out._init_from_bibtex(bib)
+        if out.fields == {}:
+            raise ValueError("Empty bibtex entry.")
+        return out, lines
 
     def _init_from_ris(self, ris, key_conversion=None):
         pass
@@ -145,3 +173,8 @@ if __name__ == "__main__":
     bib = stdin.readlines()
     b = Bibtex(bib=bib)
     print (b)
+    print(Bibtex.from_bibtex(bib))
+    print ("MULTIPLE READS")
+    bb = multiple_bibtex_entries(bib)
+    for b in bb:
+        print (b)
