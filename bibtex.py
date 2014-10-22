@@ -29,7 +29,21 @@ _months = {"01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "May",
            "06": "Jun", "07": "Jul", "08": "Aug", "09": "Sep", "10": "Oct", 
            "11": "Nov", "12": "Dec"}
 
+"""
+This map is taken from a sample from Nature. IT IS NON-STANDARD.
+"""
+_ris_fields = {"TY": "_type", "TI": "title", "JA": "journal",
+               "VL": "volume", "IS": "issue", "SP": "page", "EP": "_end_page",
+               "L3": "doi", "UR": "url"}
+
+_ris_types = {"JOUR": "article"}
+
+
 def multiple_bibtex_entries(inobj):
+    '''
+    Takes a file or string or list of lines and extracts bibtex entries,
+    returning them as a list of Bibtex objects.
+    '''
     from io import IOBase
     if isinstance(inobj, str):
         textin = inobj.splitlines()
@@ -58,12 +72,12 @@ class Bibtex:
     A very simple BibTeX class that implements automatic formatting of outoput.
     Notice that no sanity checks are performed.
     '''
-    def __init__(self, ref=None, bib=None, ris=None):
+    def __init__(self, ref=None, bib=None, ris=None, **kwargs):
         self.fields = {}
         if bib:
             self._init_from_bibtex(bib)
         elif ris:
-            self._init_from_ris(ris)
+            self._init_from_ris(ris, kwargs)
 
         if ref:
             self.fields["_key"] = ref  # This will become the item's 
@@ -92,17 +106,28 @@ class Bibtex:
  
     @staticmethod
     def from_bibtex(bib):
+        '''
+        Static method to create a Bibtex object from a string.
+        It returnes the Bibtex object and the number of lines consumed.
+        '''
         out = Bibtex()
         lines = out._init_from_bibtex(bib)
         if out.fields == {}:
             raise ValueError("Empty bibtex entry.")
         return out, lines
 
-    def _init_from_ris(self, ris, key_conversion=None):
+    def _init_from_ris(self, ris, **kwargs):
+        '''
+        Init from ris string.
+        '''
         pass
 
 
     def add_tag(self, tag):
+        '''
+        Add an empty tag to the Bibtex object. 
+        Mostly used privately, but exposed anyways.
+        '''
         if tag in self.fields.keys():
             pass
         elif tag == "author":
@@ -111,6 +136,9 @@ class Bibtex:
             self.fields[tag] = None
 
     def set_tag(self, tag, value):
+        '''
+        Set tag by tag,value pairs.
+        '''
         self.add_tag(tag)
         if tag == "author":
             if type(value) is not list:
