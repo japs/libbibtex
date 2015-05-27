@@ -185,12 +185,13 @@ class Bibtex:
         return repr(self.fields)
 
     def as_bibitem(self):
-        out = "\\bibitem{%s}\n" %self.ref
-        out += ", ".join(self.fields[author]) + ",\n"
-        out += self["journal"]
-        out += "{\\bf %s} %s (%s).\n" %(self.fields[volume], 
-                                        self.fields[page], 
-                                        self.fields[year])
+        out = "\\bibitem{%s}\n" %self.fields["_key"]
+        out += " and ".join(self.fields["author"]) + ",\n"
+        out += self.fields["title"] + ",\n"
+        out += self.fields["journal"]
+        out += "{\\bf %s} %s (%s).\n" %(self.fields["volume"], 
+                                        self.fields["pages"], 
+                                        self.fields["year"])
         return out
 
 if __name__ == "__main__":
@@ -200,9 +201,10 @@ if __name__ == "__main__":
     from sys import stdin
     bib = stdin.readlines()
     b = Bibtex(bib=bib)
-    print (b)
-    print(Bibtex.from_bibtex(bib))
-    print ("MULTIPLE READS")
+    #print (b)
+    #print(Bibtex.from_bibtex(bib))
+    #print ("MULTIPLE READS")
     bb = multiple_bibtex_entries(bib)
     for b in bb:
-        print (b)
+        print (b.as_bibitem())
+        #print (b)
