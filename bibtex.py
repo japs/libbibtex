@@ -22,6 +22,8 @@
 # with Paper.  If not, see <http://www.gnu.org/licenses/>
 #
 
+from sys import stderr
+
 _output_tags = ["title", "author", "journal", "volume", "page",
                 "year", "month", "publisher", "doi", "url", "archiveprefix"]
 
@@ -142,7 +144,7 @@ class Bibtex:
         self.add_tag(tag)
         if tag == "author":
             if type(value) is not list:
-                value = value.split("and")
+                value = value.split(" and ")
                 value = [v.strip() for v in value]
             self.fields[tag] += value
         elif tag == "_date":
@@ -186,13 +188,33 @@ class Bibtex:
 
     def as_bibitem(self):
         out = "\\bibitem{%s}\n" %self.fields["_key"]
-        out += " and ".join(self.fields["author"]) + ",\n"
+        out += self.format_author(self.fields['author']) + ",\n"
+        #out += " and ".join(self.fields["author"]) + ",\n"
         out += self.fields["title"] + ",\n"
         out += self.fields["journal"]
-        out += "{\\bf %s} %s (%s).\n" %(self.fields["volume"], 
+        out += " {\\bf %s} %s (%s).\n" %(self.fields["volume"], 
                                         self.fields["pages"], 
                                         self.fields["year"])
         return out
+
+    def format_author(self, author_list, name_fmt="initials"):
+        formatted_names = []
+        for full_name in author_list:
+            surname, name = full_name.split(',')
+            if name_fmt == "initials":
+                name = name.strip()
+                name_tokens = name.split()
+                name_formatted = ""
+                for n in name_tokens:
+                    name_formatted += n[0] + ". "
+            formatted_names.append(name_formatted + surname.strip())
+        if len(formatted_names) == 1:
+            return formatted_names[0]
+        else:
+            output = ", ".join(formatted_names[:-1]) + \
+                                 " and " + formatted_names[-1]
+            return output
+
 
 if __name__ == "__main__":
     '''
